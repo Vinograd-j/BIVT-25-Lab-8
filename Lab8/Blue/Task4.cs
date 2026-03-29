@@ -181,9 +181,7 @@ namespace Lab8.Blue
                 return result;
             }
 
-            public void Print()
-            {
-            }
+            public void Print() { }
 
         }
     }

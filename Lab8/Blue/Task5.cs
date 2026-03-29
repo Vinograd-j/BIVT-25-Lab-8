@@ -5,37 +5,37 @@ namespace Lab8.Blue
         public class Sportsman
         {
             private string _name;
+
             private string _surname;
+
             private int _place;
-            private bool _isSetted;
 
-            private const int LastPlace = 18;
-
+            private bool _isPlaceSet;
+            
+            
             public string Name => _name;
             public string Surname => _surname;
             public int Place => _place;
-
+            
             public Sportsman(string name, string surname)
             {
                 _name = name;
                 _surname = surname;
                 _place = 0;
-                _isSetted = false;
+                _isPlaceSet = false;
             }
 
             public void SetPlace(int place)
             {
-                if (!_isSetted && place > 0 && place <= LastPlace)
-                {
-                    _place = place;
-                    _isSetted = true;
-                }
+                if (_isPlaceSet)
+                    return;
+                
+                _place = place;
+                _isPlaceSet = true;
             }
 
-            public void Print()
-            {
-                Console.WriteLine($"{_name} {_surname} - Место: {_place}");
-            }
+            public void Print() { }
+
         }
 
         public abstract class Team
@@ -57,18 +57,15 @@ namespace Lab8.Blue
                 }
             }
 
-            public int TotalScore
+           public int TotalScore
             {
                 get
                 {
-                    int sum = 0;
-                    foreach (var sportsman in _sportsmen)
-                    {
-                        if (sportsman.Place != 0)
-                            sum += GetPoints(sportsman);
-                    }
-
-                    return sum;
+                    int score = 0;
+                    foreach (Sportsman sportsmen in Sportsmen)
+                        score += Math.Max(0, CountOfSportsmenInTeam - sportsmen.Place);
+                    
+                    return score;
                 }
             }
 
@@ -86,20 +83,7 @@ namespace Lab8.Blue
                     return topPlace;
                 }
             }
-
-            private int GetPoints(Sportsman sportsman)
-            {
-                switch (sportsman.Place)
-                {
-                    case 1: return 5;
-                    case 2: return 4;
-                    case 3: return 3;
-                    case 4: return 2;
-                    case 5: return 1;
-                    default: return 0;
-                }
-            }
-
+            
             protected abstract double GetTeamStrength();
 
             public Team(string name)
@@ -133,39 +117,19 @@ namespace Lab8.Blue
 
             public static void Sort(Team[] teams)
             {
-                for (int i = 0; i < teams.Length - 1; i++)
+                Array.Sort(teams, (a, b) =>
                 {
-                    for (int j = 0; j < teams.Length - 1 - i; j++)
-                    {
-                        if (teams[j].TotalScore < teams[j + 1].TotalScore)
-                        {
-                            (teams[j], teams[j + 1]) = (teams[j + 1], teams[j]);
-                        }
-                        else if (teams[j].TotalScore == teams[j + 1].TotalScore)
-                        {
-                            if (teams[j + 1].HasFirstPlace() && !teams[j].HasFirstPlace())
-                            {
-                                (teams[j], teams[j + 1]) = (teams[j + 1], teams[j]);
-                            }
-                        }
-                    }
-                }
+                    int scoreCompare = b.TotalScore.CompareTo(a.TotalScore);
+                    if (scoreCompare != 0)
+                        return scoreCompare;
+                    
+                    return a.TopPlace.CompareTo(b.TopPlace);
+                });
             }
-
-            private bool HasFirstPlace()
-            {
-                foreach (var sportsman in _sportsmen)
-                {
-                    if (sportsman.Place == 1)
-                        return true;
-                }
-
-                return false;
-            }
-
+            
             public static Team GetChampion(Team[] teams)
             {
-                if (teams == null || teams.Length == 0)
+                if (teams.Length == 0)
                     return null;
 
                 Team champion = teams[0];
@@ -184,8 +148,7 @@ namespace Lab8.Blue
                 return champion;
             }
 
-            public void Print()
-            { }
+            public void Print() { }
         }
 
         public class ManTeam : Team
